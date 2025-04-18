@@ -5,9 +5,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Link, useNavigate } from 'react-router-dom';
 import { PackageOpen, LayoutDashboard, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRole } from '@/hooks/useRole';
 
 const Index = () => {
   const { user, signOut } = useAuth();
+  const { isManager, isDelivery } = useRole();
   const navigate = useNavigate();
 
   return (
@@ -28,37 +30,41 @@ const Index = () => {
             <CardContent className="space-y-4">
               {user ? (
                 <>
-                  <Link to="/manager" className="block">
-                    <Button variant="outline" className="w-full h-20 justify-start">
-                      <div className="flex items-center">
-                        <div className="bg-primary/10 p-3 rounded-full mr-4">
-                          <LayoutDashboard className="h-6 w-6 text-primary" />
+                  {isManager && (
+                    <Link to="/manager" className="block">
+                      <Button variant="outline" className="w-full h-20 justify-start">
+                        <div className="flex items-center">
+                          <div className="bg-primary/10 p-3 rounded-full mr-4">
+                            <LayoutDashboard className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="text-left">
+                            <h3 className="font-medium">Administrador</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Gestiona pedidos y entregas de autopartes
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-left">
-                          <h3 className="font-medium">Administrador</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Gestiona pedidos y entregas de autopartes
-                          </p>
-                        </div>
-                      </div>
-                    </Button>
-                  </Link>
+                      </Button>
+                    </Link>
+                  )}
 
-                  <Link to="/delivery" className="block">
-                    <Button variant="outline" className="w-full h-20 justify-start">
-                      <div className="flex items-center">
-                        <div className="bg-primary/10 p-3 rounded-full mr-4">
-                          <PackageOpen className="h-6 w-6 text-primary" />
+                  {isDelivery && (
+                    <Link to="/delivery" className="block">
+                      <Button variant="outline" className="w-full h-20 justify-start">
+                        <div className="flex items-center">
+                          <div className="bg-primary/10 p-3 rounded-full mr-4">
+                            <PackageOpen className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="text-left">
+                            <h3 className="font-medium">Repartidor</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Entrega de autopartes
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-left">
-                          <h3 className="font-medium">Repartidor</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Entrega de autopartes
-                          </p>
-                        </div>
-                      </div>
-                    </Button>
-                  </Link>
+                      </Button>
+                    </Link>
+                  )}
 
                   <Button 
                     variant="outline" 
