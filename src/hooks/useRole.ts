@@ -30,8 +30,9 @@ export const useRole = () => {
         }
       } catch (error) {
         console.error('Error checking roles:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkRoles();

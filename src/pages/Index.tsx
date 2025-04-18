@@ -9,7 +9,7 @@ import { useRole } from '@/hooks/useRole';
 
 const Index = () => {
   const { user, signOut } = useAuth();
-  const { isManager, isDelivery } = useRole();
+  const { isManager, isDelivery, loading } = useRole();
   const navigate = useNavigate();
 
   return (
@@ -28,7 +28,11 @@ const Index = () => {
               <CardTitle className="text-center">Selecciona tu perfil</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {user ? (
+              {loading ? (
+                <div className="flex justify-center p-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : user ? (
                 <>
                   {isManager && (
                     <Link to="/manager" className="block">
