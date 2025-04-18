@@ -10,9 +10,9 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary">SnapDeliverRoute</h1>
+          <h1 className="text-4xl font-bold text-primary">Autopartes Toyota</h1>
           <p className="text-lg text-muted-foreground mt-2">
-            Gestión y seguimiento de entregas
+            Gestión de entregas y pedidos de autopartes
           </p>
         </div>
 
@@ -29,9 +29,9 @@ const Index = () => {
                       <LayoutDashboard className="h-6 w-6 text-primary" />
                     </div>
                     <div className="text-left">
-                      <h3 className="font-medium">Manager</h3>
+                      <h3 className="font-medium">Administrador</h3>
                       <p className="text-sm text-muted-foreground">
-                        Administra entregas y repartidores
+                        Gestiona pedidos y entregas de autopartes
                       </p>
                     </div>
                   </div>
@@ -47,7 +47,7 @@ const Index = () => {
                     <div className="text-left">
                       <h3 className="font-medium">Repartidor</h3>
                       <p className="text-sm text-muted-foreground">
-                        Gestiona y completa tus entregas
+                        Entrega de autopartes
                       </p>
                     </div>
                   </div>
@@ -60,7 +60,7 @@ const Index = () => {
           </Card>
           
           <div className="text-center text-sm text-muted-foreground">
-            <p>© 2025 SnapDeliverRoute. Todos los derechos reservados.</p>
+            <p>© 2025 Autopartes Toyota. Todos los derechos reservados.</p>
           </div>
         </div>
       </div>
@@ -69,3 +69,4 @@ const Index = () => {
 };
 
 export default Index;
+
