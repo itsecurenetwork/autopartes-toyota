@@ -5,11 +5,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Link, useNavigate } from 'react-router-dom';
 import { PackageOpen, LayoutDashboard, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRole } from '@/hooks/useRole';
 
 const Index = () => {
   const { user, signOut } = useAuth();
-  const { isManager, isDelivery, loading } = useRole();
   const navigate = useNavigate();
 
   return (
@@ -28,47 +26,39 @@ const Index = () => {
               <CardTitle className="text-center">Selecciona tu perfil</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {loading ? (
-                <div className="flex justify-center p-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : user ? (
+              {user ? (
                 <>
-                  {isManager && (
-                    <Link to="/manager" className="block">
-                      <Button variant="outline" className="w-full h-20 justify-start">
-                        <div className="flex items-center">
-                          <div className="bg-primary/10 p-3 rounded-full mr-4">
-                            <LayoutDashboard className="h-6 w-6 text-primary" />
-                          </div>
-                          <div className="text-left">
-                            <h3 className="font-medium">Administrador</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Gestiona pedidos y entregas de autopartes
-                            </p>
-                          </div>
+                  <Link to="/manager" className="block">
+                    <Button variant="outline" className="w-full h-20 justify-start">
+                      <div className="flex items-center">
+                        <div className="bg-primary/10 p-3 rounded-full mr-4">
+                          <LayoutDashboard className="h-6 w-6 text-primary" />
                         </div>
-                      </Button>
-                    </Link>
-                  )}
+                        <div className="text-left">
+                          <h3 className="font-medium">Administrador</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Gestiona pedidos y entregas de autopartes
+                          </p>
+                        </div>
+                      </div>
+                    </Button>
+                  </Link>
 
-                  {isDelivery && (
-                    <Link to="/delivery" className="block">
-                      <Button variant="outline" className="w-full h-20 justify-start">
-                        <div className="flex items-center">
-                          <div className="bg-primary/10 p-3 rounded-full mr-4">
-                            <PackageOpen className="h-6 w-6 text-primary" />
-                          </div>
-                          <div className="text-left">
-                            <h3 className="font-medium">Repartidor</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Entrega de autopartes
-                            </p>
-                          </div>
+                  <Link to="/delivery" className="block">
+                    <Button variant="outline" className="w-full h-20 justify-start">
+                      <div className="flex items-center">
+                        <div className="bg-primary/10 p-3 rounded-full mr-4">
+                          <PackageOpen className="h-6 w-6 text-primary" />
                         </div>
-                      </Button>
-                    </Link>
-                  )}
+                        <div className="text-left">
+                          <h3 className="font-medium">Repartidor</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Entrega de autopartes
+                          </p>
+                        </div>
+                      </div>
+                    </Button>
+                  </Link>
 
                   <Button 
                     variant="outline" 

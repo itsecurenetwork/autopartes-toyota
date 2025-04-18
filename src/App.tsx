@@ -11,7 +11,6 @@ import Manager from "./pages/Manager";
 import Delivery from "./pages/Delivery";
 import NotFound from "./pages/NotFound";
 import { DeliveryProvider } from "./context/DeliveryContext";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -26,22 +25,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route 
-                path="/manager" 
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <Manager />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/delivery" 
-                element={
-                  <ProtectedRoute requiredRole="delivery">
-                    <Delivery />
-                  </ProtectedRoute>
-                } 
-              />
+              <Route path="/manager" element={<Manager />} />
+              <Route path="/delivery" element={<Delivery />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
