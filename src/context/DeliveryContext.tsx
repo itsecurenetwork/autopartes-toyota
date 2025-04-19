@@ -1,11 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { DeliveryItem } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 type DeliveryContextType = {
   deliveries: DeliveryItem[];
-  addDelivery: (delivery: Omit<DeliveryItem, 'id' | 'createdAt' | 'status'>) => void;
-  completeDelivery: (id: string, photo: string) => void;
+  addDelivery: (delivery: Omit<DeliveryItem, 'id' | 'createdAt' | 'status'>) => Promise<void>;
+  completeDelivery: (id: string, photo: string) => Promise<void>;
   getDeliveryById: (id: string) => DeliveryItem | undefined;
 };
 
@@ -13,33 +16,84 @@ const DeliveryContext = createContext<DeliveryContextType | undefined>(undefined
 
 export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
+  const { user } = useAuth();
 
-  // Load deliveries from localStorage on component mount
   useEffect(() => {
-    const savedDeliveries = localStorage.getItem('deliveries');
-    if (savedDeliveries) {
-      setDeliveries(JSON.parse(savedDeliveries));
+    if (user) {
+      fetchDeliveries();
     }
-  }, []);
+  }, [user]);
 
-  // Save deliveries to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('deliveries', JSON.stringify(deliveries));
-  }, [deliveries]);
+  const fetchDeliveries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('deliveries')
+        .select('*');
 
-  const addDelivery = (delivery: Omit<DeliveryItem, 'id' | 'createdAt' | 'status'>) => {
-    const newDelivery: DeliveryItem = {
-      ...delivery,
-      id: Date.now().toString(),
-      createdAt: Date.now(),
-      status: 'pending',
-    };
-    setDeliveries([...deliveries, newDelivery]);
+      if (error) throw error;
+
+      setDeliveries(data.map(delivery => ({
+        ...delivery,
+        id: delivery.id,
+        createdAt: new Date(delivery.created_at).getTime(),
+        completedAt: delivery.completed_at ? new Date(delivery.completed_at).getTime() : undefined,
+      })));
+    } catch (error) {
+      console.error('Error fetching deliveries:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar las entregas',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const completeDelivery = (id: string, photo: string) => {
-    setDeliveries(
-      deliveries.map((delivery) =>
+  const addDelivery = async (delivery: Omit<DeliveryItem, 'id' | 'createdAt' | 'status'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('deliveries')
+        .insert([{
+          address: delivery.address,
+          client_name: delivery.clientName,
+          notes: delivery.notes,
+          status: 'pending',
+          user_id: user?.id
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDeliveries(prev => [...prev, {
+        ...delivery,
+        id: data.id,
+        status: 'pending',
+        createdAt: new Date(data.created_at).getTime(),
+      }]);
+    } catch (error) {
+      console.error('Error adding delivery:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo agregar la entrega',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const completeDelivery = async (id: string, photo: string) => {
+    try {
+      const { error } = await supabase
+        .from('deliveries')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          photo: photo
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setDeliveries(prev => prev.map(delivery =>
         delivery.id === id
           ? {
               ...delivery,
@@ -48,8 +102,15 @@ export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               photo,
             }
           : delivery
-      )
-    );
+      ));
+    } catch (error) {
+      console.error('Error completing delivery:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo completar la entrega',
+        variant: 'destructive',
+      });
+    }
   };
 
   const getDeliveryById = (id: string) => {
