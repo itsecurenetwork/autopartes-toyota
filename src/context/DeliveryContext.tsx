@@ -32,12 +32,19 @@ export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (error) throw error;
 
-      setDeliveries(data.map(delivery => ({
-        ...delivery,
-        id: delivery.id,
-        createdAt: new Date(delivery.created_at).getTime(),
-        completedAt: delivery.completed_at ? new Date(delivery.completed_at).getTime() : undefined,
-      })));
+      if (data) {
+        const mappedDeliveries: DeliveryItem[] = data.map(delivery => ({
+          id: delivery.id,
+          address: delivery.address,
+          clientName: delivery.client_name,
+          status: delivery.status as 'pending' | 'completed',
+          notes: delivery.notes || undefined,
+          createdAt: new Date(delivery.created_at).getTime(),
+          completedAt: delivery.completed_at ? new Date(delivery.completed_at).getTime() : undefined,
+          photo: delivery.photo || undefined,
+        }));
+        setDeliveries(mappedDeliveries);
+      }
     } catch (error) {
       console.error('Error fetching deliveries:', error);
       toast({
@@ -64,12 +71,18 @@ export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (error) throw error;
 
-      setDeliveries(prev => [...prev, {
-        ...delivery,
-        id: data.id,
-        status: 'pending',
-        createdAt: new Date(data.created_at).getTime(),
-      }]);
+      if (data) {
+        const newDelivery: DeliveryItem = {
+          id: data.id,
+          address: data.address,
+          clientName: data.client_name,
+          status: 'pending',
+          notes: data.notes || undefined,
+          createdAt: new Date(data.created_at).getTime(),
+          photo: data.photo || undefined,
+        };
+        setDeliveries(prev => [...prev, newDelivery]);
+      }
     } catch (error) {
       console.error('Error adding delivery:', error);
       toast({
