@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { DeliveryItem } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 type DeliveryContextType = {
   deliveries: DeliveryItem[];
@@ -16,6 +17,7 @@ const DeliveryContext = createContext<DeliveryContextType | undefined>(undefined
 export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchDeliveries = async () => {
     try {
@@ -28,16 +30,18 @@ export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw error;
       }
 
-      setDeliveries(data.map(delivery => ({
+      const formattedDeliveries: DeliveryItem[] = data.map(delivery => ({
         id: delivery.id,
         address: delivery.address,
         clientName: delivery.client_name,
-        status: delivery.status,
+        status: delivery.status as 'pending' | 'completed', // Cast string to union type
         notes: delivery.notes || undefined,
         createdAt: new Date(delivery.created_at).getTime(),
         completedAt: delivery.completed_at ? new Date(delivery.completed_at).getTime() : undefined,
         photo: delivery.photo || undefined,
-      })));
+      }));
+
+      setDeliveries(formattedDeliveries);
     } catch (error) {
       console.error('Error fetching deliveries:', error);
       toast({
@@ -73,6 +77,15 @@ export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const addDelivery = async (delivery: Omit<DeliveryItem, 'id' | 'createdAt' | 'status'>) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Debes iniciar sesión para crear entregas",
+      });
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('deliveries')
@@ -81,6 +94,7 @@ export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           address: delivery.address,
           notes: delivery.notes,
           status: 'pending',
+          user_id: user.id // Add the user_id field
         });
 
       if (error) throw error;
