@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { DeliveryItem } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRole } from '@/hooks/useRole';
 import { toast } from '@/components/ui/use-toast';
 
 type DeliveryContextType = {
@@ -17,20 +18,28 @@ const DeliveryContext = createContext<DeliveryContextType | undefined>(undefined
 export const DeliveryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const { user } = useAuth();
+  const { isManager, isDelivery } = useRole();
 
   useEffect(() => {
     if (user) {
       fetchDeliveries();
     }
-  }, [user]);
+  }, [user, isManager, isDelivery]);
 
   const fetchDeliveries = async () => {
     try {
+      console.log("Fetching deliveries, user role - isManager:", isManager, "isDelivery:", isDelivery);
+      
       const { data, error } = await supabase
         .from('deliveries')
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching deliveries:', error);
+        throw error;
+      }
+
+      console.log("Deliveries data from Supabase:", data);
 
       if (data) {
         const mappedDeliveries: DeliveryItem[] = data.map(delivery => ({
