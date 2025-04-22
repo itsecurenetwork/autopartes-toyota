@@ -10,12 +10,14 @@ import { supabase, checkConnection } from '@/integrations/supabase/client';
 import { ArrowLeft, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+type ConnectionStatus = 'checking' | 'connected' | 'disconnected';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('checking');
   const navigate = useNavigate();
   const { toast } = useToast();
 

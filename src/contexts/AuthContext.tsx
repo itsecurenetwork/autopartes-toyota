@@ -4,13 +4,15 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase, checkConnection } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
+type ConnectionStatus = 'checking' | 'connected' | 'disconnected';
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
   error: string | null;
   signOut: () => Promise<void>;
-  connectionStatus: 'checking' | 'connected' | 'disconnected';
+  connectionStatus: ConnectionStatus;
   retryConnection: () => Promise<boolean>;
 }
 
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('checking');
   const { toast } = useToast();
 
   const retryConnection = async () => {
