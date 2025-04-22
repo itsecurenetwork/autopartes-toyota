@@ -7,20 +7,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
+      console.log('Intentando autenticar con:', { email });
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -34,10 +38,18 @@ const Auth = () => {
         description: "Has iniciado sesión correctamente.",
       });
     } catch (error: any) {
+      console.error('Error de autenticación:', error);
+      setError(
+        error.message === 'Failed to fetch' 
+          ? 'Error de conexión. Verifica tu conexión a internet o inténtalo más tarde.'
+          : error.message
+      );
       toast({
         variant: "destructive",
         title: "Error de autenticación",
-        description: error.message,
+        description: error.message === 'Failed to fetch' 
+          ? 'Error de conexión. Verifica tu conexión a internet o inténtalo más tarde.'
+          : error.message,
       });
     } finally {
       setLoading(false);
@@ -64,6 +76,11 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -91,7 +108,12 @@ const Auth = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : 'Iniciar Sesión'}
             </Button>
           </form>
         </CardContent>
