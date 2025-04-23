@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, RotateCcw, Check } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 interface PhotoCaptureProps {
   onPhotoCapture: (photoData: string) => void;
@@ -17,12 +17,14 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onPhotoCapture }) => {
   const [photoData, setPhotoData] = useState<string | null>(null);
   const [isCameraLoading, setIsCameraLoading] = useState(true);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const startCamera = async () => {
     try {
       setIsCameraLoading(true);
       setCameraError(null);
       
+      // Request camera without checking connection status first
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',
@@ -41,14 +43,29 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onPhotoCapture }) => {
           setIsCameraLoading(false);
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al acceder a la cámara:', error);
       
-      setCameraError('No se pudo acceder a la cámara. Por favor verifica los permisos.');
+      // More descriptive error message
+      let errorMessage = 'No se pudo acceder a la cámara.';
+      
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = 'Permiso de cámara denegado. Por favor, permite el acceso a la cámara en la configuración de tu navegador.';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage = 'No se encontró ninguna cámara en este dispositivo.';
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage = 'La cámara está en uso por otra aplicación o no está disponible.';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = 'La configuración de la cámara solicitada no está disponible.';
+      } else if (error.name === 'TypeError') {
+        errorMessage = 'No se especificaron parámetros de video válidos.';
+      }
+      
+      setCameraError(errorMessage);
       setIsCameraLoading(false);
       toast({
         title: 'Error de cámara',
-        description: 'No se pudo acceder a la cámara. Verifica los permisos.',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -102,13 +119,17 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onPhotoCapture }) => {
   };
 
   useEffect(() => {
-    startCamera();
+    // Start camera with a small delay to ensure DOM is fully rendered
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 500);
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
       stopCamera();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(timer);
     };
   }, []);
 
