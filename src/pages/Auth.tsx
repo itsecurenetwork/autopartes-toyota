@@ -61,7 +61,7 @@ const Auth = () => {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Verificar conexión antes de intentar autenticar
+    // Fix: Correct type comparison using strict equality
     if (connectionStatus !== 'connected') {
       await handleRetryConnection();
       if (connectionStatus !== 'connected') {
