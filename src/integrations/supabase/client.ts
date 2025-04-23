@@ -17,33 +17,6 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storage: localStorage
-    },
-    global: {
-      fetch: (url, options) => {
-        return fetch(url, options).catch(err => {
-          console.error('Supabase fetch error:', err);
-          throw err;
-        });
-      }
     }
   }
 );
-
-// Función auxiliar para verificar la conectividad
-export const checkConnection = async () => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(SUPABASE_URL, {
-      method: 'HEAD',
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    console.error('Error al verificar la conexión:', error);
-    return false;
-  }
-};

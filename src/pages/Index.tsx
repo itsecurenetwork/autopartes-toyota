@@ -3,59 +3,40 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link, useNavigate } from 'react-router-dom';
-import { PackageOpen, LayoutDashboard, LogIn, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { PackageOpen, LayoutDashboard, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Index = () => {
-  const { user, signOut, connectionStatus, error, retryConnection, loading } = useAuth();
+  const { user, signOut, error, loading } = useAuth();
   const { isManager, isDelivery, loading: roleLoading } = useRole();
   const navigate = useNavigate();
 
-  const handleRetryConnection = async () => {
-    await retryConnection();
-  };
-
-  // Mostrar error de conexión
-  if (connectionStatus === 'disconnected') {
+  // Mostrar error genérico si hay uno
+  if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <div className="flex items-center justify-center mb-4">
-              <WifiOff className="h-16 w-16 text-destructive" />
-            </div>
-            <CardTitle className="text-center">Error de conexión</CardTitle>
+            <CardTitle className="text-center">Error</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert variant="destructive">
               <AlertDescription>
-                {error || 'No se pudo conectar al servidor. Verifica tu conexión a internet.'}
+                {error}
               </AlertDescription>
             </Alert>
             <p className="text-sm text-center text-muted-foreground">
-              La aplicación necesita una conexión a internet para funcionar correctamente.
-              Verifica tu conexión y vuelve a intentarlo.
+              Hubo un problema al iniciar la aplicación.
             </p>
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full" 
-              onClick={handleRetryConnection}
-              disabled={loading}
+              onClick={() => window.location.reload()}
             >
-              {loading ? (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  Conectando...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Reintentar conexión
-                </>
-              )}
+              Reintentar
             </Button>
           </CardFooter>
         </Card>
@@ -63,13 +44,13 @@ const Index = () => {
     );
   }
 
-  // Mostrar pantalla de carga mientras verifica la conexión
-  if (connectionStatus === 'checking') {
+  // Mostrar pantalla de carga
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <div className="text-center">
-          <Wifi className="h-12 w-12 text-primary mx-auto animate-pulse" />
-          <p className="mt-4">Verificando conexión...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4">Cargando...</p>
         </div>
       </div>
     );
